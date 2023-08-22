@@ -1,15 +1,16 @@
 package com.siller.applifting.monitor.endpointMonitoring.service;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface MonitoredEndpointService {
-    String createMonitoredEndpoint(MonitoredEndpointRegistration monitoredEndpoint);
+    UUID createMonitoredEndpoint(MonitoredEndpointRegistration monitoredEndpoint);
 
-    void updateMonitoredEndpoint(MonitoredEndpointUpdates monitoredEndpoint);
+    void updateMonitoredEndpoint(UUID id, MonitoredEndpointUpdates monitoredEndpoint) throws MonitoredEndpointNotFound;
 
-    MonitoredEndpoint getMonitoredEndpoint(String id);
+    MonitoredEndpoint getMonitoredEndpoint(UUID id) throws MonitoredEndpointNotFound;
 
-    List<MonitoredEndpointResult> getMonitoredEndpointResults(String MonitoredEndpointId);
+    List<MonitoredEndpointResult> getMonitoredEndpointResults(UUID MonitoredEndpointId) throws MonitoredEndpointNotFound;
 
-    void deleteMonitoredEndpoint(String id);
+    void deleteMonitoredEndpoint(UUID id) throws MonitoredEndpointNotFound;
 }

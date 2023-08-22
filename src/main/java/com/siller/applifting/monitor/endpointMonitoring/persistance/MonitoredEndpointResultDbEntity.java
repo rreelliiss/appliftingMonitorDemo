@@ -1,5 +1,8 @@
-package com.siller.applifting.monitor.endpointMonitoring.service;
+package com.siller.applifting.monitor.endpointMonitoring.persistance;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,8 +15,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @Setter
 @Getter
-public class MonitoredEndpointResult {
+@Entity
+public class MonitoredEndpointResultDbEntity {
 
+    @Id
+    @GeneratedValue
     private UUID id;
 
     private ZonedDateTime dateOfCheck;

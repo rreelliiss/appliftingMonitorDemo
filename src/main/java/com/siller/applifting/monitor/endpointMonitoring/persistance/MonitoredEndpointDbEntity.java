@@ -1,5 +1,9 @@
-package com.siller.applifting.monitor.endpointMonitoring.service;
+package com.siller.applifting.monitor.endpointMonitoring.persistance;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,8 +17,11 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-public class MonitoredEndpoint {
+@Entity
+public class MonitoredEndpointDbEntity {
 
+    @Id
+    @GeneratedValue
     private UUID id;
 
     private String name;
@@ -27,7 +34,8 @@ public class MonitoredEndpoint {
 
     private Integer monitoringIntervalInSeconds;
 
-    private List<MonitoredEndpointResult> monitoredEndpointResults;
+    @OneToMany
+    private List<MonitoredEndpointResultDbEntity> monitoredEndpointResults;
 
 }
 

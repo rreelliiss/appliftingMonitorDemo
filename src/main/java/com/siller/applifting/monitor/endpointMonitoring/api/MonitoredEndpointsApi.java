@@ -1,25 +1,31 @@
 package com.siller.applifting.monitor.endpointMonitoring.api;
 
+import com.siller.applifting.monitor.endpointMonitoring.service.MonitoredEndpointNotFound;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
-@RequestMapping(consumes = {"application/json"})
+@RequestMapping(path = "/endpoint-monitors")
 public interface MonitoredEndpointsApi {
 
-    @PostMapping("/endpoint-monitors")
-    public void createMonitoredEndpoint(@RequestBody @Valid MonitoredEndpointRegistrationDto monitorRegistrationDto);
+    @PostMapping(consumes = {"application/json"})
+    public void createMonitoredEndpoint(
+            @RequestBody @Valid MonitoredEndpointRegistrationDto monitorRegistrationDto,
+            HttpServletRequest request, HttpServletResponse response);
 
-    @PutMapping("/endpoint-monitor/{id}")
-    public void updateMonitoredEndpoint(@PathVariable String id, @RequestBody MonitoredEndpointUpdatesDto updateRequestDto);
+    @PutMapping(value = "/{id}", consumes = {"application/json"})
+    public void updateMonitoredEndpoint(@PathVariable UUID id, @RequestBody MonitoredEndpointUpdatesDto updateRequestDto) throws MonitoredEndpointNotFound;
 
-    @GetMapping("/endpoint-monitor/{id}")
-    public MonitoredEndpointDto getMonitoredEndpoint(@PathVariable String id);
+    @GetMapping("/{id}")
+    public MonitoredEndpointDto getMonitoredEndpoint(@PathVariable UUID id) throws MonitoredEndpointNotFound;
 
-    @GetMapping("/endpoint-monitor/{id}/results/top")
-    public List<MonitoringResultDto> getMonitoredEndpointResults(@PathVariable String id);
+    @GetMapping("/{id}/results/top")
+    public List<MonitoringResultDto> getMonitoredEndpointResults(@PathVariable("id") UUID id) throws MonitoredEndpointNotFound;
 
-    @DeleteMapping("/endpoint-monitor/{id}")
-    public void deleteMonitoredEndpoint(@PathVariable String id);
+    @DeleteMapping("/{id}")
+    public void deleteMonitoredEndpoint(@PathVariable UUID id) throws MonitoredEndpointNotFound;
 }
