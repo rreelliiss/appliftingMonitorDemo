@@ -1,8 +1,6 @@
 package com.siller.applifting.monitor.endpointMonitoring.service;
 
 import com.siller.applifting.monitor.endpointMonitoring.MonitoredEndpointMapper;
-import com.siller.applifting.monitor.endpointMonitoring.persistance.MonitoredEndpointDbEntity;
-import com.siller.applifting.monitor.endpointMonitoring.persistance.MonitoredEndpointRepository;
 import com.siller.applifting.monitor.endpointMonitoring.monitoring.EndpointChecksScheduler;
 import jakarta.transaction.Transactional;
 import lombok.SneakyThrows;
@@ -11,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,43 +33,33 @@ public class MonitoredEndpointServiceImpl implements MonitoredEndpointService {
 
     @Override
     @Transactional
-    public UUID createMonitoredEndpoint(MonitoredEndpointRegistration monitoredEndpointRegistration) {
-        MonitoredEndpoint monitoredEndpoint = mapper.toMonitoredEndpoint(monitoredEndpointRegistration);
+    public UUID createMonitoredEndpoint(MonitoredEndpointRegistration monitoredEndpointRegistration, UUID ownerId) {
+        MonitoredEndpoint monitoredEndpoint = mapper.toMonitoredEndpoint(monitoredEndpointRegistration, ownerId);
         monitoredEndpoint.setDateOfCreation(Instant.now());
-        MonitoredEndpointDbEntity monitoredEndpointDbEntity = mapper.toMonitoredEndpointDbEntity(monitoredEndpoint);
-        MonitoredEndpointDbEntity savedEntity = repository.save(monitoredEndpointDbEntity);
-        monitoredEndpoint.setId(savedEntity.getId());
+        repository.save(monitoredEndpoint);
         scheduler.scheduleTask(monitoredEndpoint, this::updateMonitoredEndpointWithNewResult);
-        return savedEntity.getId();
+        return monitoredEndpoint.getId();
     }
 
     @Override
     @Transactional
-    public void updateMonitoredEndpoint(UUID id, MonitoredEndpointUpdates monitoredEndpointUpdates) throws MonitoredEndpointNotFound {
-        MonitoredEndpoint monitoredEndpoint = getMonitoredEndpoint(id);
+    public void updateMonitoredEndpoint(MonitoredEndpoint monitoredEndpoint, MonitoredEndpointUpdates monitoredEndpointUpdates) throws MonitoredEndpointNotFound {
         mapper.update(monitoredEndpoint, monitoredEndpointUpdates);
-        repository.save(mapper.toMonitoredEndpointDbEntity(monitoredEndpoint));
+        repository.save(monitoredEndpoint);
         scheduler.updateTask(monitoredEndpoint, this::updateMonitoredEndpointWithNewResult);
     }
 
     @Override
     public MonitoredEndpoint getMonitoredEndpointWithoutResults(UUID id) throws MonitoredEndpointNotFound {
-        MonitoredEndpointDbEntity monitoredEndpointDbEntity = repository.findById(id).orElseThrow(() -> new MonitoredEndpointNotFound(id));
-        return mapper.toMonitoredEndpoint(
-                monitoredEndpointDbEntity
-        );
-    }
-
-    @Override
-    @Transactional
-    public List<MonitoredEndpointResult> getMonitoredEndpointResults(UUID monitoredEndpointId) throws MonitoredEndpointNotFound {
-        MonitoredEndpoint monitoredEndpoint = getMonitoredEndpoint(monitoredEndpointId);
-        return monitoredEndpoint.getMonitoredEndpointResults();
+        return repository.findById(id).orElseThrow(() -> new MonitoredEndpointNotFound(id));
     }
 
     @Transactional
     public void updateMonitoredEndpointWithNewResult(UUID monitoredEndpointId, MonitoredEndpointResult result) throws MonitoredEndpointNotFound {
         MonitoredEndpoint monitoredEndpoint = getMonitoredEndpoint(monitoredEndpointId);
+        if(monitoredEndpoint.getMonitoredEndpointResults() == null){
+            monitoredEndpoint.setMonitoredEndpointResults(new ArrayList<>());
+        }
         List<MonitoredEndpointResult> monitoredEndpointResults = monitoredEndpoint.getMonitoredEndpointResults();
         if(monitoredEndpoint.getDateOfLastCheck() == null || result.getDateOfCheck().isAfter(monitoredEndpoint.getDateOfLastCheck())){
             monitoredEndpoint.setDateOfLastCheck(result.getDateOfCheck());
@@ -79,7 +68,7 @@ public class MonitoredEndpointServiceImpl implements MonitoredEndpointService {
         if(monitoredEndpointResults.size() == 11){
             removeOldestResult(monitoredEndpoint);
         }
-        repository.save(mapper.toMonitoredEndpointDbEntity(monitoredEndpoint));
+        repository.save(monitoredEndpoint);
     }
 
     private static void removeOldestResult(MonitoredEndpoint monitoredEndpoint) {
@@ -95,20 +84,24 @@ public class MonitoredEndpointServiceImpl implements MonitoredEndpointService {
         monitoredEndpointResults.remove(oldestIndex);
     }
 
-    private MonitoredEndpoint getMonitoredEndpoint(UUID monitoredEndpointId) throws MonitoredEndpointNotFound {
-        MonitoredEndpointDbEntity monitoredEndpointDbEntity = repository.findById(monitoredEndpointId)
+    public MonitoredEndpoint getMonitoredEndpoint(UUID monitoredEndpointId) throws MonitoredEndpointNotFound {
+        MonitoredEndpoint monitoredEndpoint = repository.findById(monitoredEndpointId)
                 .orElseThrow(() -> new MonitoredEndpointNotFound(monitoredEndpointId));
-        Hibernate.initialize(monitoredEndpointDbEntity.getMonitoredEndpointResults());
-        return mapper.toMonitoredEndpoint(monitoredEndpointDbEntity);
+        Hibernate.initialize(monitoredEndpoint.getMonitoredEndpointResults());
+        return monitoredEndpoint;
     }
 
 
     @SneakyThrows
     @Override
-    @Transactional
-    public void deleteMonitoredEndpoint(UUID id) throws MonitoredEndpointNotFound {
-        MonitoredEndpoint monitoredEndpoint = getMonitoredEndpoint(id);
-        repository.deleteById(monitoredEndpoint.getId());
+    public void deleteMonitoredEndpoint(MonitoredEndpoint monitoredEndpoint) {
+        UUID id = monitoredEndpoint.getId();
+        repository.deleteById(id);
         scheduler.interruptAndRemoveScheduledTaskSync(id);
+    }
+
+    @Override
+    public List<MonitoredEndpoint> getMonitoredEndpointsOfUserWithId(UUID userId) {
+        return repository.findAllByOwnerId(userId);
     }
 }

@@ -1,4 +1,4 @@
-package com.siller.applifting.monitor.user;
+package com.siller.applifting.monitor.user.api;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;

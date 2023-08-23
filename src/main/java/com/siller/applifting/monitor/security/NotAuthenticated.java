@@ -1,4 +1,4 @@
 package com.siller.applifting.monitor.security;
 
-public class NotAuthorized extends Exception {
+public class NotAuthenticated extends Exception {
 }

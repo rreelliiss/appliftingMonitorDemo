@@ -1,15 +1,36 @@
-package com.siller.applifting.monitor.user;
+package com.siller.applifting.monitor.user.service;
 
+import com.siller.applifting.monitor.user.UserMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
+
+    private final UserRepository repository;
+
+    private final UserMapper mapper;
+
+    public UserServiceImpl(@Autowired UserRepository repository, @Autowired UserMapper mapper) {
+        this.repository = repository;
+        this.mapper = mapper;
+    }
+
     @Override
     public User getUserByToken(String token) throws UserNotFound {
-        return switch (token) {
-            case "93f39e2f-80de-4033-99ee-249d92736a25" -> new User("Applifting");
-            case "dcb20f8a-5657-4f1b-9f7f-ce65739b359e" -> new User("Batman");
-            default -> null;
-        };
+        User user = repository.findByToken(token);
+        if(user == null){
+            throw new UserNotFound();
+        }
+        return user;
+    }
+
+    @Override
+    public User createUser(UserRegistration userRegistration) {
+        User user = mapper.toUser(userRegistration, String.valueOf(UUID.randomUUID()));
+        repository.save(user);
+        return user;
     }
 }

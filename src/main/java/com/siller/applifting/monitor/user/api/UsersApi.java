@@ -1,16 +1,13 @@
-package com.siller.applifting.monitor.user;
+package com.siller.applifting.monitor.user.api;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 public interface UsersApi {
 
-    @PostMapping("/users")
-    UserDto createUser(UserRegistrationDto u, HttpServletResponse response);
-
-    @DeleteMapping("/user/{login}")
-    void removeUser(@PathVariable String login);
+    public static final String USER_PATH_PREFIX="/users";
+    @PostMapping(USER_PATH_PREFIX)
+    UserDto createUser(UserRegistrationDto u, HttpServletRequest request, HttpServletResponse response);
 
 }

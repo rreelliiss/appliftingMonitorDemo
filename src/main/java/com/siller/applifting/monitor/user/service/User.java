@@ -1,14 +1,24 @@
-package com.siller.applifting.monitor.user;
+package com.siller.applifting.monitor.user.service;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
+@Entity
+@Table(indexes = {
+        @Index(name = "tokenIndex", columnList = "token", unique = true)
+})
 @Getter
-@AllArgsConstructor
+@NoArgsConstructor
+@Setter
 public class User {
 
+    @Id
+    @GeneratedValue
     private UUID id;
 
     private String username;

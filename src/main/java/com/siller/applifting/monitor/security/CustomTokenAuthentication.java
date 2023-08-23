@@ -1,10 +1,12 @@
-package com.siller.applifting.monitor.endpointMonitoring.security;
+package com.siller.applifting.monitor.security;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 
 public class CustomTokenAuthentication implements Authentication {
@@ -13,24 +15,27 @@ public class CustomTokenAuthentication implements Authentication {
 
     private boolean isAuthenticated;
 
-    private final String userName;
+    private final UUID id;
 
     public static CustomTokenAuthentication fromToken(String token){
         return new CustomTokenAuthentication(token, null);
     }
 
-    public static CustomTokenAuthentication fromUsername(String username){
-        return new CustomTokenAuthentication(null, username);
+    public static CustomTokenAuthentication authenticatedFromId(UUID id){
+        CustomTokenAuthentication customTokenAuthentication = new CustomTokenAuthentication(null, id);
+        customTokenAuthentication.setAuthenticated(true);
+        return customTokenAuthentication;
     }
 
-    private CustomTokenAuthentication(String token, String userName) {
+    private CustomTokenAuthentication(String token, UUID id) {
         this.token = token;
-        this.userName = userName;
+        this.id = id;
     }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return new ArrayList<>();
     }
 
     @Override
@@ -44,8 +49,8 @@ public class CustomTokenAuthentication implements Authentication {
     }
 
     @Override
-    public Object getPrincipal() {
-        return null;
+    public UUID getPrincipal() {
+        return id;
     }
 
     @Override
@@ -55,8 +60,7 @@ public class CustomTokenAuthentication implements Authentication {
 
     @Override
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-        Assert.isTrue(!isAuthenticated, "Cannot set this token to trusted - use constructor which takes instead");
-        this.isAuthenticated = false;
+        this.isAuthenticated = isAuthenticated;
     }
 
     @Override
