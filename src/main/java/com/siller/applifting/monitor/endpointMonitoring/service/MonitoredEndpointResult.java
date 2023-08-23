@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -16,7 +16,7 @@ public class MonitoredEndpointResult {
 
     private UUID id;
 
-    private ZonedDateTime dateOfCheck;
+    private Instant dateOfCheck;
 
     private Integer statusCode;
 

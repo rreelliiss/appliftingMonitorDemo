@@ -8,9 +8,9 @@ public interface MonitoredEndpointService {
 
     void updateMonitoredEndpoint(UUID id, MonitoredEndpointUpdates monitoredEndpoint) throws MonitoredEndpointNotFound;
 
-    MonitoredEndpoint getMonitoredEndpoint(UUID id) throws MonitoredEndpointNotFound;
+    MonitoredEndpoint getMonitoredEndpointWithoutResults(UUID id) throws MonitoredEndpointNotFound;
 
-    List<MonitoredEndpointResult> getMonitoredEndpointResults(UUID MonitoredEndpointId) throws MonitoredEndpointNotFound;
+    List<MonitoredEndpointResult> getMonitoredEndpointResults(UUID monitoredEndpointId) throws MonitoredEndpointNotFound;
 
     void deleteMonitoredEndpoint(UUID id) throws MonitoredEndpointNotFound;
 }

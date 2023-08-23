@@ -1,5 +1,6 @@
 package com.siller.applifting.monitor.endpointMonitoring.persistance;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -34,7 +35,7 @@ public class MonitoredEndpointDbEntity {
 
     private Integer monitoringIntervalInSeconds;
 
-    @OneToMany
+    @OneToMany(cascade= CascadeType.ALL, orphanRemoval=true)
     private List<MonitoredEndpointResultDbEntity> monitoredEndpointResults;
 
 }

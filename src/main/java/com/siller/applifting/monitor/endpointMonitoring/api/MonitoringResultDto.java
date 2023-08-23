@@ -1,10 +1,10 @@
 package com.siller.applifting.monitor.endpointMonitoring.api;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record MonitoringResultDto (
         UUID id,
-        ZonedDateTime dateOfCheck,
+        LocalDateTime dateOfCheck,
         Integer statusCode,
         String payload){}

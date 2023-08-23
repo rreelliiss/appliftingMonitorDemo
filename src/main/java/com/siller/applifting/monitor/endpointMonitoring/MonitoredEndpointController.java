@@ -1,14 +1,17 @@
 package com.siller.applifting.monitor.endpointMonitoring;
 
-import com.siller.applifting.monitor.endpointMonitoring.api.*;
-import com.siller.applifting.monitor.endpointMonitoring.service.MonitoredEndpointNotFound;
-import com.siller.applifting.monitor.endpointMonitoring.service.MonitoredEndpointRegistration;
-import com.siller.applifting.monitor.endpointMonitoring.service.MonitoredEndpointService;
+import com.siller.applifting.monitor.endpointMonitoring.api.MonitoredEndpointDto;
+import com.siller.applifting.monitor.endpointMonitoring.api.MonitoredEndpointRegistrationDto;
+import com.siller.applifting.monitor.endpointMonitoring.api.MonitoredEndpointUpdatesDto;
+import com.siller.applifting.monitor.endpointMonitoring.api.MonitoredEndpointsApi;
+import com.siller.applifting.monitor.endpointMonitoring.api.MonitoringResultDto;
+import com.siller.applifting.monitor.endpointMonitoring.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,17 +47,21 @@ public class MonitoredEndpointController implements MonitoredEndpointsApi {
 
     @Override
     public void updateMonitoredEndpoint(UUID id, MonitoredEndpointUpdatesDto updateRequestDto) throws MonitoredEndpointNotFound {
-        service.updateMonitoredEndpoint(id, mapper.toMonitoredEndpointUpdates(updateRequestDto));
+        MonitoredEndpointUpdates monitoredEndpoint = mapper.toMonitoredEndpointUpdates(updateRequestDto);
+        service.updateMonitoredEndpoint(id, monitoredEndpoint);
     }
 
     @Override
     public MonitoredEndpointDto getMonitoredEndpoint(UUID id) throws MonitoredEndpointNotFound {
-        return mapper.toMonitoredEndpointDto(service.getMonitoredEndpoint(id));
+        return mapper.toMonitoredEndpointDto(service.getMonitoredEndpointWithoutResults(id));
     }
 
     @Override
     public List<MonitoringResultDto> getMonitoredEndpointResults(UUID monitoredEndpointId) throws MonitoredEndpointNotFound {
-        return mapper.toMonitoredEndpointResultDtos(service.getMonitoredEndpointResults(monitoredEndpointId));
+        List<MonitoredEndpointResult> monitoredEndpointResults = service.getMonitoredEndpointResults(monitoredEndpointId);
+        List<MonitoringResultDto> monitoringResultDtos = mapper.toMonitoredEndpointResultDtos(monitoredEndpointResults);
+        monitoringResultDtos.sort(Comparator.comparing(MonitoringResultDto::dateOfCheck));
+        return monitoringResultDtos;
     }
 
     @Override

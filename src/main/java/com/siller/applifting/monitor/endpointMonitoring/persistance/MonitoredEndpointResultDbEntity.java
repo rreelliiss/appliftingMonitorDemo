@@ -1,5 +1,6 @@
 package com.siller.applifting.monitor.endpointMonitoring.persistance;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -8,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -22,9 +23,10 @@ public class MonitoredEndpointResultDbEntity {
     @GeneratedValue
     private UUID id;
 
-    private ZonedDateTime dateOfCheck;
+    private Instant dateOfCheck;
 
     private Integer statusCode;
 
+    @Column(columnDefinition = "LONGTEXT")
     private String payload;
 }
