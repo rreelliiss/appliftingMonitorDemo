@@ -1,11 +1,7 @@
 package com.siller.applifting.monitor.endpointMonitoring.service;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.security.core.userdetails.User;
 
 import java.time.Instant;
@@ -18,6 +14,7 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
+@EqualsAndHashCode
 public class MonitoredEndpoint {
 
     @Id

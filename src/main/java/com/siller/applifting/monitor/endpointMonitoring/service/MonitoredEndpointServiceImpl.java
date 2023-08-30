@@ -8,6 +8,7 @@ import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,20 +23,24 @@ public class MonitoredEndpointServiceImpl implements MonitoredEndpointService {
 
     private final EndpointChecksScheduler scheduler;
 
+    private final Clock clock;
+
     public MonitoredEndpointServiceImpl(
             @Autowired MonitoredEndpointMapper monitoredEndpointMapper,
             @Autowired MonitoredEndpointRepository monitoredEndpointRepository,
-            @Autowired EndpointChecksScheduler scheduler){
+            @Autowired EndpointChecksScheduler scheduler,
+            @Autowired Clock clock){
         mapper = monitoredEndpointMapper;
         repository = monitoredEndpointRepository;
         this.scheduler = scheduler;
+        this.clock = clock;
     }
 
     @Override
     @Transactional
     public UUID createMonitoredEndpoint(MonitoredEndpointRegistration monitoredEndpointRegistration, UUID ownerId) {
         MonitoredEndpoint monitoredEndpoint = mapper.toMonitoredEndpoint(monitoredEndpointRegistration, ownerId);
-        monitoredEndpoint.setDateOfCreation(Instant.now());
+        monitoredEndpoint.setDateOfCreation(Instant.now(clock));
         repository.save(monitoredEndpoint);
         scheduler.scheduleTask(monitoredEndpoint, this::updateMonitoredEndpointWithNewResult);
         return monitoredEndpoint.getId();
@@ -43,10 +48,11 @@ public class MonitoredEndpointServiceImpl implements MonitoredEndpointService {
 
     @Override
     @Transactional
-    public void updateMonitoredEndpoint(MonitoredEndpoint monitoredEndpoint, MonitoredEndpointUpdates monitoredEndpointUpdates) throws MonitoredEndpointNotFound {
+    public MonitoredEndpoint updateMonitoredEndpoint(MonitoredEndpoint monitoredEndpoint, MonitoredEndpointUpdates monitoredEndpointUpdates) throws MonitoredEndpointNotFound {
         mapper.update(monitoredEndpoint, monitoredEndpointUpdates);
-        repository.save(monitoredEndpoint);
+        MonitoredEndpoint save = repository.save(monitoredEndpoint);
         scheduler.updateTask(monitoredEndpoint, this::updateMonitoredEndpointWithNewResult);
+        return save;
     }
 
     @Override

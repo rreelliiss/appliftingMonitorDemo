@@ -34,7 +34,6 @@ public abstract class MonitoredEndpointMapper {
 
     public abstract  List<MonitoringResultDto> toMonitoredEndpointResultDtos(List<MonitoredEndpointResult> monitoredEndpointResults);
 
-
     public abstract MonitoredEndpoint toMonitoredEndpoint(MonitoredEndpointRegistration monitoredEndpointRegistration, UUID ownerId);
 
     protected LocalDateTime map(Instant instant){

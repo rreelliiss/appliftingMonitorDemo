@@ -9,7 +9,9 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(indexes = {
+@Table(
+        name = "users",
+        indexes = {
         @Index(name = "tokenIndex", columnList = "token", unique = true)
 })
 @Getter
